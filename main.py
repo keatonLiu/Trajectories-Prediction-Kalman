@@ -4,6 +4,8 @@ import copy
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy._core._umath_tests import inner1d
+
 import utils
 from XMLParser import XMLParser
 from kalman_filter_kitti import kalman_filter_kitti
@@ -11,10 +13,9 @@ import pdb
 import datetime
 import os
 import parse_trajectories
-from numpy.core.umath_tests import inner1d
 
 
-def ModHausdorffDist(A,B):
+def ModHausdorffDist(A, B):
     # This function computes the Modified Hausdorff Distance (MHD) which is
     # proven to function better than the directed HD as per Dubuisson et al.
     # in the following work:
@@ -44,16 +45,16 @@ def ModHausdorffDist(A,B):
     # the points must be the same.
     #
     # Edward DongBo Cui Stanford University; 06/17/2014
-    
+
     # Find pairwise distance
-    D_mat = np.sqrt(inner1d(A,A)[np.newaxis].T + inner1d(B,B)-2*(np.dot(A,B.T)))
+    D_mat = np.sqrt(inner1d(A, A)[np.newaxis].T + inner1d(B, B) - 2 * (np.dot(A, B.T)))
     # Calculating the forward HD: mean(min(each col))
-    FHD = np.mean(np.min(D_mat,axis=1))
+    FHD = np.mean(np.min(D_mat, axis=1))
     # Calculating the reverse HD: mean(min(each row))
-    RHD = np.mean(np.min(D_mat,axis=0))
+    RHD = np.mean(np.min(D_mat, axis=0))
     # Calculating mhd
     MHD = np.max(np.array([FHD, RHD]))
-    return (MHD, FHD, RHD)
+    return MHD, FHD, RHD
 
 
 # Parse command line arguments
@@ -73,7 +74,6 @@ parser.add_argument('-a', '--acceleration', action='store_true', help='use accel
 
 args = parser.parse_args()
 
-
 """ PARAMETERS """
 save_plot = args.save
 n = args.past_len
@@ -88,10 +88,10 @@ cone = False
 
 # save folder
 name_test = str(datetime.datetime.now())[:19] + 'past_' + str(n) + 'acc_' + str(acceleration)
+name_test = name_test.replace(':', '_')
 if not os.path.exists(name_test):
     os.makedirs(name_test)
 path_complete = name_test + '/'
-
 
 # -------------------------------------- START SCRIPT -------------------------------------- #
 
@@ -104,7 +104,7 @@ P0 = np.diag(np.full(n_dim, p0))
 point_index = 19
 
 # load xml
-list_xml = os.listdir('tracklets')
+# list_xml = os.listdir('tracklets')
 
 # initialize variable for results
 tracks_total = 0
@@ -133,7 +133,7 @@ for track in track_list:
         if not os.path.exists(video_path + vehicle):
             os.makedirs(video_path + vehicle)
         vehicle_path = video_path + vehicle + '/'
-        pred_trajectory = kalman_filter_kitti(P0, Q, R0, n, k, num_frames, measurements, F, H, point_index,cone
+        pred_trajectory = kalman_filter_kitti(P0, Q, R0, n, k, num_frames, measurements, F, H, point_index, cone
                                               )
 
         for i_pred, index in zip(range(len(pred_trajectory)), range(point_index - n + 1, num_frames - n - k + 1)):
@@ -190,8 +190,8 @@ mean_mhd = mhd / tracks_total
 # save results in a file
 file = open(path_complete + "errors_allTracks.txt", "w")
 file.write("Acceleration? " + str(acceleration) + '\n')
-file.write("dimension of past" + str(n) + '\n')
-file.write("dimension of future" + str(k) + '\n')
+file.write("dimension of past: " + str(n) + '\n')
+file.write("dimension of future: " + str(k) + '\n')
 file.write("total tracks " + str(tracks_total) + '\n')
 file.write("error 1s: " + str(mean_1s_allTracks) + '\n')
 file.write("error 2s: " + str(mean_2s_allTracks) + '\n')

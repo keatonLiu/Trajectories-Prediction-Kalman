@@ -1,0 +1,10 @@
+Acceleration? True
+dimension of past 5
+dimension of future 40
+total tracks 1600
+error 1s: 0.0009161539471939749
+error 2s: 0.0013421471992618513
+error 3s: 0.0020577240629365014
+error 4s: 0.002334169539008871
+error mean: 2.7488812970351972
+error mhd: 1.8103957369896324

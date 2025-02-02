@@ -48,9 +48,11 @@ def convert_oxts_to_pose(oxts):
     return pose
 
 
-def proj_latlon(lat, lon):
-    myProj = pyproj.Proj(proj='utm', ellps='WGS84')
-    x, y = myProj(lon, lat)
+def proj_latlon(lat: float, lon: float):
+    # 创建坐标转换器
+    transformer = pyproj.Transformer.from_crs("EPSG:4326", "EPSG:32632", always_xy=True)
+    # 将经纬度转换为 UTM 坐标
+    x, y = transformer.transform(lon, lat)
     return x, y
 
 
